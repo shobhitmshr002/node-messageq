@@ -1,12 +1,12 @@
 {
-    
   "name": "node-messageq",
   "description": "message queue service",
-  "version": "0.0.6",
+  "version": "0.0.8",
   "main": "index.js",
   "author": "Shobhit Mishra",
   "repository": {
-    "type": "git"
+    "type": "git",
+    "url": "https://github.com/shobhitmshr002/node-messageq"
   },
   "engines": {
     "node": "8.1.x",
@@ -14,7 +14,8 @@
   },
   "dependencies": {
     "amqplib": "^0.5.2",
-    "node-messageq": "0.0.5"
+    "node-messageq": "0.0.5",
+    "winston": "^3.1.0"
   },
   "keywords": [
     "mesageQ",

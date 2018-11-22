@@ -1,6 +1,8 @@
 var amqp = require('amqplib/callback_api');
 // module.exports.publishAsync = publishAsync;
 // module.exports.publish = publish;
+var winston = require('winston');
+//var logger = new winston.Logger();
 module.exports = rabbitMQ;
 var connection, channel;
 
@@ -25,18 +27,32 @@ function rabbitMQ (config) {
             });
           },
           
-          publish : function (queue, data, opts, cb) {
+          publish : function (queue, data, opts) {
+            let options = opts;
+            options['persistent'] = opts.persistent ? opts.persistent : false;
+            createProducer(queue, function (err, channel) {
+              if (err) {
+                //logger.info("error in create producer",err.message);
+              } else {
+                channel.sendToQueue(queue, encode(data), options);
+              }
+            });
+          },
+          publishWithKey:function (queue, key, data, opts, cb) {
             let options = opts;
             options['persistent'] = opts.persistent ? opts.persistent : false;
             createProducer(queue, function (err, channel) {
               if (err) {
                 cb(err);
               } else {
-                channel.sendToQueue(queue, encode(data), options);
+                asyncPublishWithKey(queue, key, encode(data), options).then(function(result){
+                  cb(result);  
+                }).catch(function(err){
+                  cb(err)
+                })
               }
             });
           },
-          
           consume : function (queue, cb) {
             assertQueue(queue, function (err, channel) {
               if (err) {
@@ -57,7 +73,7 @@ function rabbitMQ (config) {
                     channel.ack(msg);
                     consumeData();
                   } else {
-                    console.log('no message, waiting...');
+                    //console.log('no message, waiting...');
                     consumeData();
                   }
                 }
@@ -141,6 +157,11 @@ function connect (cb) {
   
   async function asyncSendToQueue(queue, data, options) {
     var result = await channel.sendToQueue(queue, data, options);
+    return result;
+  }
+
+  async function asyncPublishWithKey(queue, key, data, options) {
+    var result = await channel.publish(queue, key, data, options);
     return result;
   }
 }
