@@ -17,6 +17,11 @@ function MQ (config) {
         }
     }
     return {
+          createChannel:function (cb) {
+            mqHandler.createChannel(function(err,channel){
+              cb(err,channel);
+            });
+          },
           publishAsync:function (queue, data, opts, cb) {
             mqHandler.publishAsync(queue, data, opts, function(err){
               cb(err);
@@ -27,6 +32,7 @@ function MQ (config) {
             mqHandler.publish(queue, data, opts);
           },
           publishWithKey:function (queue, key, data, opts, cb) {
+              
             mqHandler.publishWithKey(queue, key, data, opts, cb);
           },
           consume:function (queue,cb) {

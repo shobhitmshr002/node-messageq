@@ -11,7 +11,17 @@ function rabbitMQ (config) {
 
 
     return {
-        publishAsync : function (queue, data, opts, cb) {
+          createChannel : function (cb) {
+            createChannel(function (err, channel) {
+              if (err) {
+                console.log("err in create channel",err,channel);
+                cb(err);
+              } else {
+                cb(null,channel);
+              }
+            });
+          },  
+          publishAsync : function (queue, data, opts, cb) {
             let options = opts;
             options['persistent'] = opts.persistent ? opts.persistent : false;
             createProducer(queue, function (err, channel) {
@@ -41,17 +51,11 @@ function rabbitMQ (config) {
           publishWithKey:function (queue, key, data, opts, cb) {
             let options = opts;
             options['persistent'] = opts.persistent ? opts.persistent : false;
-            createProducer(queue, function (err, channel) {
-              if (err) {
-                cb(err);
-              } else {
-                asyncPublishWithKey(queue, key, encode(data), options).then(function(result){
-                  cb(result);  
-                }).catch(function(err){
-                  cb(err)
-                })
-              }
-            });
+              asyncPublishWithKey(queue, key, encode(data), options).then(function(result){
+                cb(null,result);  
+              }).catch(function(err){
+                cb(err)
+              });
           },
           consume : function (queue, cb) {
             assertQueue(queue, function (err, channel) {
